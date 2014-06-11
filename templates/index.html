@@ -1,0 +1,35 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <script src="/static/javascript/jquery-2.1.0.min.js"></script>
+  <script src="/static/javascript/socket.io.min.js"></script>
+  
+  <script type="text/javascript" charset="utf-8">
+
+    $(document).ready(function(){
+      var socket = io.connect('http://' + document.domain + ':' + location.port + '/');
+      console.log('Qeueue wall is ready!');
+
+      socket.on('new serial data', function(msg){
+        console.log('asdasdasd');
+        console.log(msg);
+      });
+
+      socket.emit('request serial data');
+
+  	});
+  	
+  </script>
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+
+<!-- <body style="background-color:#FF0000"> -->
+	SUP
+    
+<!-- </body> -->
+</html>
