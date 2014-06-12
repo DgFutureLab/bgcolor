@@ -21,9 +21,11 @@ def read_serial_port():
 	while True:
 		reading = serial_connection.readline()
 		reading = int((int(reading) / 1024.0) * 255)
-		print 'From serial:', reading
-		socketio.emit('new serial data', {'reading':reading}, namespace = '/serial')
-		time.sleep(0.1)
+		rgb = (reading, 128, 64)
+		color = '#'+''.join(map(chr, rgb)).encode('hex')
+		print 'From serial:', color
+		socketio.emit('new serial data', {'color':color}, namespace = '/serial')
+		# time.sleep(0.1)
 
 if __name__ == "__main__":
 	Thread(target = read_serial_port).start()

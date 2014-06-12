@@ -26,13 +26,14 @@
     $(document).ready(function(){
       var socket = io.connect('http://' + document.domain + ':' + location.port + '/serial');
       console.log('asd');
-      
+      // $("#magicbox").css("background-color", "#FF00FF");
       socket.on('new serial data', function(msg){
-        console.log("Received serial data");
+        // console.log("Received serial data");
         // console.log(msg.reading);
-        var color = "background-color: " + "#" + msg.reading + "0000";
-        console.log(color);
-        $('#magicbox').css("background-color: ");
+        // var css = "background-color: " + msg.color + ";";
+        console.log(msg.color);
+        $( "#body" ).html( "<div style='width:100%; height:1000px; background-color:" + msg.color + ";'></div>." );
+        // $('#magicbox').css("background-color", msg.color);
       });
 
       socket.emit('request serial data', function(msg){
@@ -45,6 +46,5 @@
 </head>
 
 <body id="body">
-<div id="magicbox"></div>
 </body>
 </html>
