@@ -1,9 +1,6 @@
 from flask import Flask
 flapp = Flask(__name__)
 
-import redis
-rcon = redis.Redis()
-
 from flask.ext.socketio import SocketIO
 socketio = SocketIO(flapp)
 
