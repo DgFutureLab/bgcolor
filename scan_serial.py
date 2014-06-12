@@ -3,8 +3,8 @@ import urllib2
 import os
 import re
 
-url = "http://cryptic-harbor-7040.herokuapp.com/color"
-url = "http://127.0.0.1:8080/color"
+url = "http://cryptic-harbor-7040.herokuapp.com:8080/color"
+# url = "http://127.0.0.1:8080/color"
 if __name__ == "__main__":
 	device = '/dev/' + filter(lambda x: re.match('tty.usbmodem*', x), os.listdir('/dev'))[0]
 	serial_connection = serial.Serial(device, 9600)
