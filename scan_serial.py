@@ -6,14 +6,22 @@ import numpy
 import time
 from Queue import Queue, Empty
 from threading import Thread, Event
-from logging import Logger, FileHandler
+from logging import Logger, Formatter
+from logging.handlers import RotatingFileHandler
+from argparse import ArgumentParser
+
 logger = Logger(__name__)
-logger.addHandler(FileHandler('log.txt'))
-logger.setLevel('DEBUG')
+logger.setLevel('INFO')
+handler = RotatingFileHandler('log.txt', maxBytes = 10**6)
+formatter = Formatter('%(asctime)s - %(thread)d - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
-
+parser = ArgumentParser()
+parser.add_argument('--ip', required = True, help = 'Server IP address e.g., 107.170.251.142')
+args = parser.parse_args()
 # url = "http://cryptic-harbor-7040.herokuapp.com:8080/color"
-url = "http://107.170.251.142:8080/color"
+url = "http://%s/color"%args.ip
 # url = "http://127.0.0.1:8080/color"
 
 
@@ -32,8 +40,12 @@ def read_serial(name, is_running):
 
 	while is_running.isSet():
 		reading = serial_connection.readline()
-		reading = int((int(reading) / 1024.0) * 255)
-		
+		try:
+			reading = int((int(reading) / 1024.0) * 255)
+		except ValueError:
+			print 'Problem reading serial port. Please try to run the program again!'	
+			os._exit(1)
+
 		if reading != previous_reading:
 			queue.put(reading)
 			previous_reading = reading
@@ -52,9 +64,9 @@ def send_data(name, is_running):
 			
 			rgb = (red, 100, 100)
 			color = '#'+''.join(map(chr, rgb)).encode('hex')
-			logger.debug('Sending HTTP request with color: %s'%color)
+			logger.info('Sending HTTP request with color: %s'%color)
 
-			request = urllib2.Request('http://107.170.251.142/color', data = color, headers = {'Content-Type':'text/plain'})
+			request = urllib2.Request(url, data = color, headers = {'Content-Type':'text/plain'})
 			response = urllib2.urlopen(request)
 		except Empty:
 			pass
