@@ -10,7 +10,7 @@ def send_color():
 	color = request.data
 	print color
 	socketio.emit('new serial data', {'color':color}, namespace = '/serial')
-	return ''
+	return 'OK'
 
 @socketio.on('request serial data', namespace = '/serial')
 def send_images():
