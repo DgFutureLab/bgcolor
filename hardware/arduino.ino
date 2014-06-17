@@ -10,22 +10,4 @@ void setup(){
 void loop(){
     Serial.println(analogRead(buttonPin));
     delay(100);
-//   buttonState = digitalRead(buttonPin);
-//   Serial.println(buttonState);
-
-//  
-//  if (buttonState == HIGH){
-//    counter += 1;
-//    Serial.println("Good boy!");
-//    while (buttonState == HIGH){
-//    }
-//
-//  }
-//   if (buttonState == LOW){
-//    Serial.println("Press the button, damnit!");
-//    while (buttonState == LOW){
-//    }
-//  }
-//  delay(100);
-  
 }
