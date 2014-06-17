@@ -96,15 +96,3 @@ if __name__ == "__main__":
 		is_running.clear()
 		serial_reader.join()
 		data_sender.join()
-		# serial_connection.close()
-
-	
-
-
-	
-		
-		# request = urllib2.Request(url, color, {'Content-Type': 'text/plain'})
-		# response = urllib2.urlopen(request)
-		# print response
-		# socketio.emit('new serial data', {'color':color}, namespace = '/serial')
-		# time.sleep(0.1)
