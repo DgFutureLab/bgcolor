@@ -4,29 +4,30 @@ import os
 import re
 import numpy
 import time
-from Queue import Queue, Empty
+import sys
+from Queue import Queue, Empty, Full
 from threading import Thread, Event
-from logging import Logger, Formatter
+from logging import Logger, Formatter, StreamHandler
 from logging.handlers import RotatingFileHandler
 from argparse import ArgumentParser
 
 logger = Logger(__name__)
-logger.setLevel('INFO')
-handler = RotatingFileHandler('log.txt', maxBytes = 10**6)
+logger.setLevel('DEBUG')
+filehandler = RotatingFileHandler('log.txt', maxBytes = 10**6)
+streamhandler = StreamHandler(sys.stdout)
 formatter = Formatter('%(asctime)s - %(thread)d - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+filehandler.setFormatter(formatter)
+streamhandler.setFormatter(formatter)
+logger.addHandler(filehandler)
+logger.addHandler(streamhandler)
 
 parser = ArgumentParser()
-parser.add_argument('--ip', required = True, help = 'Server IP address e.g., 107.170.251.142')
+parser.add_argument('-r', '--remote-host', help = 'Server IP address e.g., 107.170.251.142')
 args = parser.parse_args()
-# url = "http://cryptic-harbor-7040.herokuapp.com:8080/color"
-url = "http://%s/color"%args.ip
-# url = "http://127.0.0.1:8080/color"
 
 
 
-queue = Queue()
+queue = Queue(1)
 
 def read_serial(name, is_running):
 	logger.debug('Running %s'%name)
@@ -47,7 +48,10 @@ def read_serial(name, is_running):
 			os._exit(1)
 
 		if reading != previous_reading:
-			queue.put(reading)
+			try:
+				queue.put_nowait(reading)
+			except Full:
+				logger.debug('Full queue. Discarding reding: %s'%reading)
 			previous_reading = reading
 		
 		logger.debug('reading: %s'%reading)
@@ -56,14 +60,15 @@ def read_serial(name, is_running):
 	serial_connection.close()
 
 
-def send_data(name, is_running):
+def send_color(name, is_running):
 	logger.debug('Running %s'%name)
 	while is_running.isSet():
 		try:
-			red = queue.get(timeout = 0.001)
+			latest_reading = queue.get(timeout = 0.1)
 			
-			rgb = (red, 100, 100)
+			rgb = (latest_reading, 100, 100)
 			color = '#'+''.join(map(chr, rgb)).encode('hex')
+			
 			logger.info('Sending HTTP request with color: %s'%color)
 
 			request = urllib2.Request(url, data = color, headers = {'Content-Type':'text/plain'})
@@ -84,10 +89,14 @@ if __name__ == "__main__":
 	
 	serial_reader = Thread(target = read_serial, args = ('Serial reader', is_running))
 	serial_reader.start()
+	print args.remote_host
 
-	
-	data_sender = Thread(target = send_data, args = ('Data sender', is_running))
-	data_sender.start()
+	if args.remote_host:
+		url = "http://%s/color"%args.remote_host
+		data_sender = Thread(target = send_color, args = ('Data sender', is_running))
+		data_sender.start()
+	else:
+		print 'ATTENTION: Running without remote host, so no data is being sent to server'
 	
 	try:
 		while True:
@@ -95,4 +104,4 @@ if __name__ == "__main__":
 	except KeyboardInterrupt:
 		is_running.clear()
 		serial_reader.join()
-		data_sender.join()
+		# data_sender.join()
